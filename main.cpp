@@ -2,6 +2,8 @@
 #include <SDL3/SDL.h>
 #include <GL/glew.h>
 
+#include "math.hpp"
+
 bool quit = false;
 
 void event() {
