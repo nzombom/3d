@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 
 #include "math.hpp"
+#include "shader.hpp"
 
 bool quit = false;
 

@@ -2,22 +2,43 @@
 #define SHADER_H
 
 #include <string>
+using string = std::string;
 
 #include "math.hpp"
+
+struct Camera {
+	vector p;
+	quat r;
+	float near;
+	float far;
+	float fov;
+	float aspect;
+
+	matrix projectionMatrix() {
+		float right = near * std::tan(fov / 2.0);
+		float top = right / aspect;
+		return { near / right, 0, 0, 0,
+			0, near / top, 0, 0,
+			0, 0, -(far + near) / (far - near), -1,
+			0, 0, -2 * far * near / (far - near) };
+	}
+};
 
 class Shader {
 	unsigned int id;
 
 	public:
-	Shader(std::string, std::string);
+	Shader(string, string);
 	~Shader();
 
 	void use();
-	void setBool(std::string, bool);
-	void setInt(std::string, int);
-	void setFloat(std::string, float);
-	void setVector(std::string, vector);
-	void setMatrix(std::string, matrix);
+	void setBool(string, bool);
+	void setInt(string, int);
+	void setFloat(string, float);
+	void setVector(string, vector);
+	void setQuat(string, quat);
+	void setMatrix(string, matrix);
+	void applyCamera(Camera);
 };
 
 #endif

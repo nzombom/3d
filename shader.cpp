@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+using string = std::string;
 #include <sstream>
 #include <fstream>
 #include <GL/glew.h>
@@ -7,7 +8,7 @@
 #include "shader.hpp"
 #include "math.hpp"
 
-Shader::Shader(std::string vPath, std::string fPath) {
+Shader::Shader(string vPath, string fPath) {
 	std::ifstream vFile;
 	std::ifstream fFile;
 	vFile.open(vPath);
@@ -17,8 +18,8 @@ Shader::Shader(std::string vPath, std::string fPath) {
 	std::stringstream fCodeStream;
 	vCodeStream << vFile.rdbuf();
 	fCodeStream << fFile.rdbuf();
-	std::string vCode = vCodeStream.str();
-	std::string fCode = fCodeStream.str();
+	string vCode = vCodeStream.str();
+	string fCode = fCodeStream.str();
 	const char* vcCode = vCode.c_str();
 	const char* fcCode = fCode.c_str();
 
@@ -74,20 +75,30 @@ Shader::~Shader() {
 void Shader::use() {
 	glUseProgram(id);
 }
-void Shader::setBool(std::string name, bool value) {
+void Shader::setBool(string name, bool value) {
 	glUniform1i(glGetUniformLocation(id, name.c_str()), (int)value);
 }
-void Shader::setInt(std::string name, int value) {
+void Shader::setInt(string name, int value) {
 	glUniform1i(glGetUniformLocation(id, name.c_str()), value);
 }
-void Shader::setFloat(std::string name, float value) {
+void Shader::setFloat(string name, float value) {
 	glUniform1f(glGetUniformLocation(id, name.c_str()), value);
 }
-void Shader::setVector(std::string name, vector value) {
+void Shader::setVector(string name, vector value) {
 	glUniform3f(glGetUniformLocation(id, name.c_str()),
 			value.x, value.y, value.z);
 }
-void Shader::setMatrix(std::string name, matrix value) {
+void Shader::setQuat(string name, quat value) {
+	glUniform4f(glGetUniformLocation(id, name.c_str()),
+			value.r.x, value.r.y, value.r.z, value.w);
+}
+void Shader::setMatrix(string name, matrix value) {
 	glUniformMatrix4fv(glGetUniformLocation(id, name.c_str()),
 			1, false, value.v);
+}
+
+void Shader::applyCamera(Camera c) {
+	setVector("viTranslate", -c.p);
+	setQuat("viRotate", c.r.conj());
+	setMatrix("projectionMatrix", c.projectionMatrix());
 }
