@@ -108,4 +108,8 @@ struct quat {
 	}
 };
 
+struct matrix {
+	float v[16];
+};
+
 #endif
