@@ -98,7 +98,7 @@ void Shader::setMatrix(string name, matrix value) {
 }
 
 void Shader::applyCamera(Camera c) {
-	setVector("viTranslate", -c.p);
-	setQuat("viRotate", c.r.conj());
-	setMatrix("projectionMatrix", c.projectionMatrix());
+	setVector("vTranslate", -c.p);
+	setQuat("vRotate", c.r.conj());
+	setMatrix("projection", c.projectionMatrix());
 }

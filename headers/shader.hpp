@@ -20,7 +20,7 @@ struct Camera {
 		return { near / right, 0, 0, 0,
 			0, near / top, 0, 0,
 			0, 0, -(far + near) / (far - near), -1,
-			0, 0, -2 * far * near / (far - near) };
+			0, 0, -2 * far * near / (far - near), 0 };
 	}
 };
 
