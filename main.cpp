@@ -34,14 +34,14 @@ int main() {
 		Shader("resources/shaders/v.glsl", "resources/shaders/f.glsl");
 	shader.use();
 
-	Camera cam = { { 0, 0, 3 }, { 1, { 0, 0, 0 } },
+	Camera cam = { { 0, 0, 4 }, { 1, { 0, 0, 0 } },
 			1, 8, M_PI / 2.0, 16.0 / 9.0 };
 
 	while (!quit) {
 		event();
 		unsigned int t = SDL_GetTicks();
 
-		float y = std::sin(t / 1000.0);
+		float y = 2 * std::sin(t / 1000.0);
 		float qr = std::sin(t / 2.0 / 1000.0);
 		float qw = std::cos(t / 2.0 / 1000.0);
 		shader.setVector("mTranslate", { 0, y, 0 });
