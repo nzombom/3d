@@ -24,10 +24,10 @@ struct vector {
 		return { x / b.x, y / b.y, z / b.z };
 	}
 	vector operator*(float s) {
-		return { s * x, s * y, s * z };
+		return { x * s, y * s, z * s };
 	}
 	vector operator/(float s) {
-		return { s / x, s / y, s / z };
+		return { x / s, y / s, z / s };
 	}
 	float operator|(vector b) {
 		return x * b.x + y * b.y + z * b.z;

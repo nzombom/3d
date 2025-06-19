@@ -11,6 +11,7 @@ uniform vec4 vRotate;
 uniform mat4 projection;
 
 out vec3 pos;
+out vec3 oPos;
 out vec3 normal;
 out vec3 cameraPos;
 out vec4 color;
@@ -22,6 +23,7 @@ vec3 rotate(vec3 v, vec4 q) {
 }
 
 void main() {
+	oPos = aPos;
 	vec3 mPos = rotate(aPos * mScale, mRotate) + mTranslate;
 	pos = mPos;
 	normal = rotate(normalize(aNormal / mScale), mRotate);

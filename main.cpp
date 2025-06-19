@@ -6,6 +6,7 @@
 #include "math.hpp"
 #include "shader.hpp"
 #include "mesh.hpp"
+#include "meshUtils.hpp"
 
 bool quit = false;
 
@@ -22,13 +23,7 @@ int main() {
 	SDL_GL_CreateContext(window);
 	glewInit();
 	glViewport(0, 0, 960, 540);
-
-	Mesh mesh = Mesh({
-		{ { -1, -1, 0 }, { 0, 0, 1 } },
-		{ { 1, -1, 0 }, { 0, 0, 1 } },
-		{ { 1, 1, 0 }, { 0, 0, 1 } },
-		{ { -1, 1, 0 }, { 0, 0, 1 } },
-	}, { 0, 1, 2, 0, 2, 3 });
+	glEnable(GL_DEPTH_TEST);
 
 	Shader shader =
 		Shader("resources/shaders/v.glsl", "resources/shaders/f.glsl");
@@ -36,6 +31,8 @@ int main() {
 
 	Camera cam = { { 0, 0, 4 }, { 1, { 0, 0, 0 } },
 			1, 8, M_PI / 2.0, 16.0 / 9.0 };
+
+	Mesh mesh = generateSphere(16);
 
 	while (!quit) {
 		event();
@@ -50,7 +47,7 @@ int main() {
 		shader.applyCamera(cam);
 
 		glClearColor(0x0.2p0, 0x0.2p0, 0x0.2p0, 1);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		mesh.draw();
 
