@@ -38,13 +38,23 @@ int main() {
 		event();
 		unsigned int t = SDL_GetTicks();
 
-		float y = 2 * std::sin(t / 1000.0);
+		float y = std::sin(t / 1000.0);
+		float x = std::sin(t / 1000.0);
+		float z = std::cos(t / 1000.0);
 		float qr = std::sin(t / 2.0 / 1000.0);
 		float qw = std::cos(t / 2.0 / 1000.0);
-		shader.setVector("mTranslate", { 0, y, 0 });
+		shader.setVector("mTranslate", { 0, y * 2, 0 });
 		shader.setQuat("mRotate", { qw, { 0, qr, 0 } });
 		shader.setVector("mScale", { 1, 1, 1 });
 		shader.applyCamera(cam);
+
+		shader.setVector("lightPos", { x * 2, 0, z * 2 });
+		shader.setVector("lightStrength", { 1, 1, 1 });
+		shader.setFloat("lightRadius", 4);
+
+		shader.setVector("diffuse", { 1, 0.5, 0.5 });
+		shader.setVector("specular", { 1, 0.5, 0.5 });
+		shader.setFloat("highlight", 32);
 
 		glClearColor(0x0.2p0, 0x0.2p0, 0x0.2p0, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
