@@ -1,9 +1,10 @@
 OPTS = -Wall -Wextra -iquote headers/
 
-main: main.o shader.o mesh.o meshUtils.o
-	g++ $(OPTS) -o main main.o shader.o mesh.o meshUtils.o -lSDL3 -lGL -lGLEW
+main: main.o shader.o mesh.o meshUtils.o renderer.o
+	g++ $(OPTS) -o main main.o shader.o mesh.o meshUtils.o renderer.o -lSDL3 -lGL -lGLEW
 
-main.o: main.cpp headers/math.hpp headers/shader.hpp headers/mesh.hpp headers/meshUtils.hpp
+main.o: main.cpp headers/math.hpp headers/shader.hpp headers/mesh.hpp\
+	headers/meshUtils.hpp headers/renderer.hpp
 	g++ $(OPTS) -c -o main.o main.cpp
 
 shader.o: shader.cpp headers/shader.hpp headers/math.hpp
@@ -15,9 +16,13 @@ mesh.o: mesh.cpp headers/mesh.hpp headers/math.hpp
 meshUtils.o: meshUtils.cpp headers/meshUtils.hpp headers/mesh.hpp headers/math.hpp
 	g++ $(OPTS) -c -o meshUtils.o meshUtils.cpp
 
+renderer.o: renderer.cpp headers/renderer.hpp headers/shader.hpp headers/mesh.hpp
+	g++ $(OPTS) -c -o renderer.o renderer.cpp
+
 headers/shader.hpp: headers/math.hpp
 headers/mesh.hpp: headers/math.hpp
 headers/meshUtils.hpp: headers/mesh.hpp
+headers/renderer.hpp: headers/shader.hpp headers/mesh.hpp headers/meshUtils.hpp
 
 clean:
 	rm *.o

@@ -24,10 +24,17 @@ struct Camera {
 	}
 };
 
+struct Light {
+	vector p;
+	vector c;
+	float r;
+};
+
 class Shader {
 	unsigned int id;
 
 	public:
+	Shader();
 	Shader(string, string);
 	~Shader();
 
@@ -39,6 +46,7 @@ class Shader {
 	void setQuat(string, quat);
 	void setMatrix(string, matrix);
 	void applyCamera(Camera);
+	void applyLight(Light);
 };
 
 #endif

@@ -1,4 +1,4 @@
-#include <iostream>
+#include <stdexcept>
 #include <string>
 using string = std::string;
 #include <sstream>
@@ -8,6 +8,9 @@ using string = std::string;
 #include "shader.hpp"
 #include "math.hpp"
 
+Shader::Shader() {
+	id = 0;
+}
 Shader::Shader(string vPath, string fPath) {
 	std::ifstream vFile;
 	std::ifstream fFile;
@@ -31,15 +34,15 @@ Shader::Shader(string vPath, string fPath) {
 	int success;
 	char infoLog[4096];
 
+
 	v = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(v, 1, &vcCode, NULL);
 	glCompileShader(v);
 	glGetShaderiv(v, GL_COMPILE_STATUS, &success);
 	if (!success) {
-		glGetShaderInfoLog(v, 512, NULL, infoLog);
-		std::cerr <<
-			"\e[1;31merror with vertex shader compilation: \e[m"
-			<< infoLog << std::endl;
+		glGetShaderInfoLog(v, 4096, NULL, infoLog);
+		throw std::runtime_error("\e[1;31merror with shader compilation:\e[m "
+				+ vPath + ":\n" + infoLog);
 	}
 
 	f = glCreateShader(GL_FRAGMENT_SHADER);
@@ -47,10 +50,9 @@ Shader::Shader(string vPath, string fPath) {
 	glCompileShader(f);
 	glGetShaderiv(f, GL_COMPILE_STATUS, &success);
 	if (!success) {
-		glGetShaderInfoLog(f, 512, NULL, infoLog);
-		std::cerr <<
-			"\e[1;31merror with fragment shader compilation: \e[m"
-			<< infoLog << std::endl;
+		glGetShaderInfoLog(f, 4096, NULL, infoLog);
+		throw std::runtime_error("\e[1;31merror with shader compilation:\e[m "
+				+ fPath + ":\n" + infoLog);
 	}
 
 	id = glCreateProgram();
@@ -59,10 +61,9 @@ Shader::Shader(string vPath, string fPath) {
 	glLinkProgram(id);
 	glGetProgramiv(id, GL_LINK_STATUS, &success);
 	if (!success) {
-		glGetProgramInfoLog(f, 512, NULL, infoLog);
-		std::cerr <<
-			"\e[1;31merror with program linking: \e[m"
-			<< infoLog << std::endl;
+		glGetProgramInfoLog(id, 4096, NULL, infoLog);
+		throw std::runtime_error("\e[1;31merror with program linking:\e[m "
+				+ vPath + ", " + fPath + ":\n" + infoLog);
 	}
 
 	glDeleteShader(v);
@@ -96,9 +97,13 @@ void Shader::setMatrix(string name, matrix value) {
 	glUniformMatrix4fv(glGetUniformLocation(id, name.c_str()),
 			1, false, value.v);
 }
-
 void Shader::applyCamera(Camera c) {
 	setVector("vTranslate", -c.p);
 	setQuat("vRotate", c.r.conj());
 	setMatrix("projection", c.projectionMatrix());
+}
+void Shader::applyLight(Light l) {
+	setVector("lightPos", l.p);
+	setVector("lightStrength", l.c);
+	setFloat("lightRadius", l.r);
 }
