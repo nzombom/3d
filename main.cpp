@@ -34,14 +34,17 @@ int main() {
 			"shaders/lightf.glsl");
 
 	Camera cam = { { 0, 0, 4 }, { 1, { 0, 0, 0 } },
-			1, 16, M_PI / 2.0, 16.0 / 9.0 };
+			1, 64, M_PI / 2.0, 16.0 / 9.0 };
 
-	Mesh sphere = generateSphere(32);
+	Mesh cube = generateCube();
+	Mesh sphere = generateSphere(16);
 	Mesh lightSphere = generateSphere(8);
 
 	while (!quit) {
 		event();
 		unsigned int t = SDL_GetTicks();
+
+		Transform bgt = { { 0, 0, 0 }, IDR, { 4, 4, 4 } };
 
 		float y = std::sin(t / 1000.0);
 		float qr = std::sin(t / 2.0 / 1000.0);
@@ -53,13 +56,14 @@ int main() {
 		};
 		float x = std::sin(t / 1000.0);
 		float z = std::cos(t / 1000.0);
-		Light lightA = { { x * 2, 0, z * 2 }, { 1, 1, 1 }, 4 };
-		Light lightB = { { x * -2, 0, z * -2 }, { 1, 1, 1 }, 4 };
+		Light lightA = { { x * 2, 0, z * 2 }, { 0.5, 0.5, 0.5 }, 8 };
+		Light lightB = { { x * -2, 0, z * -2 }, { 0.5, 0.5, 0.5 }, 8 };
 		Transform lat = { { x * 2, 0, z * 2 }, IDR, IDS / 8 };
 		Transform lbt = { { x * -2, 0, z * -2 }, IDR, IDS / 8 };
 
 		r.beginBufferRender();
 		r.renderMeshBuffered(sphere, st, cam);
+		r.renderMeshBuffered(cube, bgt, cam);
 		r.endBufferRender();
 
 		glClearColor(0, 0, 0, 1);

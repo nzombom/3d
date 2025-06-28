@@ -11,5 +11,6 @@ layout (location = 2) out vec4 gColor;
 void main() {
 	gPosition = vec4(pos, 1.0);
 	gNormal = vec4(normalize(vNormal), 1.0);
+	if (!gl_FrontFacing) gNormal *= -1;
 	gColor = vec4(1.0, 0.5, 0.5, 0.25);
 }
