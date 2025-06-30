@@ -1,4 +1,5 @@
-#include <stdexcept>
+#include <iostream>
+#include <cstring>
 #include <string>
 using string = std::string;
 #include <sstream>
@@ -8,14 +9,23 @@ using string = std::string;
 #include "shader.hpp"
 #include "math.hpp"
 
-Shader::Shader() {
-	id = 0;
-}
 Shader::Shader(string vPath, string fPath) {
 	std::ifstream vFile;
 	std::ifstream fFile;
 	vFile.open(vPath);
+	if (!vFile.is_open()) {
+		std::cerr << "\e[31;1merror with shader file read:\e[m "
+			+ vPath + ":\n" + std::strerror(errno) << std::endl;
+		id = 0;
+		return;
+	}
 	fFile.open(fPath);
+	if (!fFile.is_open()) {
+		std::cerr << "\e[31;1merror with shader file read:\e[m "
+			+ fPath + ":\n" + std::strerror(errno) << std::endl;
+		id = 0;
+		return;
+	}
 
 	std::stringstream vCodeStream;
 	std::stringstream fCodeStream;
@@ -41,8 +51,10 @@ Shader::Shader(string vPath, string fPath) {
 	glGetShaderiv(v, GL_COMPILE_STATUS, &success);
 	if (!success) {
 		glGetShaderInfoLog(v, 4096, NULL, infoLog);
-		throw std::runtime_error("\e[1;31merror with shader compilation:\e[m "
-				+ vPath + ":\n" + infoLog);
+		std::cerr << "\e[31;1merror with shader compilation:\e[m "
+			+ vPath + ":\n" + infoLog << std::endl;
+		id = 0;
+		return;
 	}
 
 	f = glCreateShader(GL_FRAGMENT_SHADER);
@@ -51,8 +63,10 @@ Shader::Shader(string vPath, string fPath) {
 	glGetShaderiv(f, GL_COMPILE_STATUS, &success);
 	if (!success) {
 		glGetShaderInfoLog(f, 4096, NULL, infoLog);
-		throw std::runtime_error("\e[1;31merror with shader compilation:\e[m "
-				+ fPath + ":\n" + infoLog);
+		std::cerr << "\e[31;1merror with shader compilation:\e[m "
+			+ fPath + ":\n" + infoLog << std::endl;
+		id = 0;
+		return;
 	}
 
 	id = glCreateProgram();
@@ -62,8 +76,10 @@ Shader::Shader(string vPath, string fPath) {
 	glGetProgramiv(id, GL_LINK_STATUS, &success);
 	if (!success) {
 		glGetProgramInfoLog(id, 4096, NULL, infoLog);
-		throw std::runtime_error("\e[1;31merror with program linking:\e[m "
-				+ vPath + ", " + fPath + ":\n" + infoLog);
+		std::cerr << "\e[31;1merror with program linking:\e[m "
+			+ vPath + ", " + fPath + ":\n" + infoLog << std::endl;
+		id = 0;
+		return;
 	}
 
 	glDeleteShader(v);

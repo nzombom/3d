@@ -5,7 +5,8 @@
 #include "shader.hpp"
 #include "mesh.hpp"
 
-Renderer::Renderer(Shader &b, Shader &l) {
+Renderer::Renderer(Shader &b, Shader &l):
+	bufferShader(b), deferredMtlShader(l) {
 	glGenFramebuffers(1, &gBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 
@@ -48,9 +49,6 @@ Renderer::Renderer(Shader &b, Shader &l) {
 		throw std::runtime_error("\e[1;31merror with framebuffer\e[m");
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	bufferShader = b;
-	deferredMtlShader = l;
 }
 Renderer::~Renderer() {
 	glDeleteTextures(1, &gPosition);

@@ -15,7 +15,7 @@ out vec4 FragColor;
 
 void main() {
 	vec2 texCoords = gl_FragCoord.xy / vec2(960, 540);
-	if (texture(gPosition, texCoords).w == 0) discard;
+	if (texture(gNormal, texCoords).w == 0) discard;
 	vec3 pos = texture(gPosition, texCoords).rgb;
 	vec3 normal = texture(gNormal, texCoords).rgb;
 	vec3 color = texture(gColor, texCoords).rgb;
@@ -40,7 +40,7 @@ void main() {
 	float s = d / lightRadius;
 	float attenuation;
 	if (s < 0 || s > 1) attenuation = 0;
-	else attenuation = pow(1 - s * s, 2) / (1 + s * s);
+	else attenuation = pow(1 - s * s, 2) / (1 + 8 * s * s);
 	vec3 lv = lightStrength * color
 		* (av + dv + specular *  sv)
 		* attenuation;

@@ -1,8 +1,8 @@
 #ifndef SHADER_H
 #define SHADER_H
 
+#include <cstring>
 #include <string>
-using string = std::string;
 
 #include "math.hpp"
 
@@ -34,17 +34,16 @@ class Shader {
 	unsigned int id;
 
 	public:
-	Shader();
-	Shader(string, string);
+	Shader(std::string, std::string);
 	~Shader();
 
 	void use();
-	void setBool(string, bool);
-	void setInt(string, int);
-	void setFloat(string, float);
-	void setVector(string, vector);
-	void setQuat(string, quat);
-	void setMatrix(string, matrix);
+	void setBool(std::string, bool);
+	void setInt(std::string, int);
+	void setFloat(std::string, float);
+	void setVector(std::string, vector);
+	void setQuat(std::string, quat);
+	void setMatrix(std::string, matrix);
 	void applyCamera(Camera);
 	void applyLight(Light);
 };

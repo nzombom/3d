@@ -29,9 +29,10 @@ int main() {
 			"shaders/bufferf.glsl");
 	Shader deferredScreenShader("shaders/deferredv.glsl",
 			"shaders/deferredf.glsl");
-	Renderer r(bufferShader, deferredScreenShader);
 	Shader lightShader("shaders/bufferv.glsl",
 			"shaders/lightf.glsl");
+
+	Renderer r(bufferShader, deferredScreenShader);
 
 	Camera cam = { { 0, 0, 4 }, { 1, { 0, 0, 0 } },
 			1, 64, M_PI / 2.0, 16.0 / 9.0 };
@@ -46,18 +47,12 @@ int main() {
 
 		Transform bgt = { { 0, 0, 0 }, IDR, { 4, 4, 4 } };
 
-		float y = std::sin(t / 1000.0);
-		float qr = std::sin(t / 2.0 / 1000.0);
-		float qw = std::cos(t / 2.0 / 1000.0);
-		Transform st = {
-			{ 0, y * 2, 0 },
-			{ qw, { 0, qr, 0 } },
-			{ 1, 1, 1 },
-		};
+		float y = std::cos(t / 1000.0);
+		Transform st = { { 0, y * 2, 0 }, IDR, { 1, 1, 1 }, };
 		float x = std::sin(t / 1000.0);
 		float z = std::cos(t / 1000.0);
-		Light lightA = { { x * 2, 0, z * 2 }, { 0.5, 0.5, 0.5 }, 8 };
-		Light lightB = { { x * -2, 0, z * -2 }, { 0.5, 0.5, 0.5 }, 8 };
+		Light lightA = { { x * 2, 0, z * 2 }, { 1, 1, 1 }, 8 };
+		Light lightB = { { x * -2, 0, z * -2 }, { 1, 1, 1 }, 8 };
 		Transform lat = { { x * 2, 0, z * 2 }, IDR, IDS / 8 };
 		Transform lbt = { { x * -2, 0, z * -2 }, IDR, IDS / 8 };
 
