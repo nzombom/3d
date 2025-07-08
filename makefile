@@ -1,28 +1,21 @@
-OPTS = -Wall -Wextra -iquote headers/
+BUILD_DIR = ./build
+SRC_DIR = ./src
 
-main: main.o shader.o mesh.o meshUtils.o renderer.o
-	g++ $(OPTS) -o main main.o shader.o mesh.o meshUtils.o renderer.o -lSDL3 -lGL -lGLEW
+SRCS = $(shell find $(SRC_DIR) -name *.cpp)
+OBJS = $(SRCS:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
+DEPS = $(OBJS:.o=.d)
 
-main.o: main.cpp headers/math.hpp headers/shader.hpp headers/mesh.hpp\
-	headers/meshUtils.hpp headers/renderer.hpp
-	g++ $(OPTS) -c -o main.o main.cpp
+FLAGS = -Wall -Wextra -iquote ./src/headers
 
-shader.o: shader.cpp headers/shader.hpp headers/math.hpp
-	g++ $(OPTS) -c -o shader.o shader.cpp
+LIBS = -lGL -lGLEW -lSDL3
 
-mesh.o: mesh.cpp headers/mesh.hpp headers/math.hpp
-	g++ $(OPTS) -c -o mesh.o mesh.cpp
+main: $(OBJS)
+	g++ $(OBJS) -o $@ $(LIBS)
 
-meshUtils.o: meshUtils.cpp headers/meshUtils.hpp headers/mesh.hpp headers/math.hpp
-	g++ $(OPTS) -c -o meshUtils.o meshUtils.cpp
-
-renderer.o: renderer.cpp headers/renderer.hpp headers/shader.hpp headers/mesh.hpp
-	g++ $(OPTS) -c -o renderer.o renderer.cpp
-
-headers/shader.hpp: headers/math.hpp
-headers/mesh.hpp: headers/math.hpp
-headers/meshUtils.hpp: headers/mesh.hpp
-headers/renderer.hpp: headers/shader.hpp headers/mesh.hpp headers/meshUtils.hpp
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
+	g++ $(FLAGS) -c $< -o $@
 
 clean:
-	rm *.o
+	rm -r $(BUILD_DIR)/*
+
+-include $(DEPS)

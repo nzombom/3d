@@ -32,10 +32,13 @@ struct Light {
 
 class Shader {
 	unsigned int id;
+	std::string vPath, fPath;
 
 	public:
 	Shader(std::string, std::string);
 	~Shader();
+
+	void compile();
 
 	void use();
 	void setBool(std::string, bool);

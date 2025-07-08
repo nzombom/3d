@@ -14,8 +14,16 @@ struct vector {
 	vector operator+(vector b) {
 		return { x + b.x, y + b.y, z + b.z };
 	}
+	vector * operator+=(vector b) {
+		x += b.x; y += b.y; z += b.z;
+		return this;
+	}
 	vector operator-(vector b) {
 		return { x - b.x, y - b.y, z - b.z };
+	}
+	vector * operator-=(vector b) {
+		x -= b.x; y -= b.y; z -= b.z;
+		return this;
 	}
 	vector operator*(vector b) {
 		return { x * b.x, y * b.y, z * b.z };

@@ -29,7 +29,7 @@ void main() {
 	float hn = dot(halfway, normal);
 
 	float av, dv, sv;
-	av = 0.25;
+	av = 0.125;
 	if (ln > 0) {
 		dv = ln;
 		if (hn > 0) {

@@ -9,7 +9,12 @@ using string = std::string;
 #include "shader.hpp"
 #include "math.hpp"
 
-Shader::Shader(string vPath, string fPath) {
+Shader::Shader(string v, string f) {
+	vPath = v;
+	fPath = f;
+}
+
+void Shader::compile() {
 	std::ifstream vFile;
 	std::ifstream fFile;
 	vFile.open(vPath);
