@@ -105,11 +105,31 @@ struct quat {
 		float len = std::sqrt(w * w + r.slen());
 		return { w / len, r / len };
 	}
+	quat * renormalize() {
+		float len = std::sqrt(w * w + r.slen());
+		w = w / len;
+		r = r / len;
+		return this;
+	}
 	quat conj() {
 		return { w, -r };
 	}
 	quat operator*(quat b) {
 		return { w * b.w - (r | b.r), b.r * w + r * b.w + (r & b.r) };
+	}
+	quat * operator*=(quat b) {
+		w = w * b.w - (r | b.r);
+		r = { b.r * w + r * b.w + (r & b.r) };
+		return this;
+	}
+	quat operator/(quat b) {
+		return *this * b.conj();
+	}
+	quat * operator/=(quat b) {
+		quat q = *this / b;
+		w = q.w;
+		r = q.r;
+		return this;
 	}
 	vector rotate(vector v) {
 		return v + ((r + r) & ((r & v) + v * w));

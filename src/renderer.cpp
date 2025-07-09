@@ -13,7 +13,7 @@ Renderer::Renderer(Shader &b, Shader &l):
 	glGenTextures(1, &gPosition);
 	glBindTexture(GL_TEXTURE_2D, gPosition);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F,
-			960, 540, 0, GL_RGBA, GL_FLOAT, NULL);
+			1920, 1080, 0, GL_RGBA, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
@@ -22,7 +22,7 @@ Renderer::Renderer(Shader &b, Shader &l):
 	glGenTextures(1, &gNormal);
 	glBindTexture(GL_TEXTURE_2D, gNormal);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F,
-			960, 540, 0, GL_RGBA, GL_FLOAT, NULL);
+			1920, 1080, 0, GL_RGBA, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1,
@@ -31,7 +31,7 @@ Renderer::Renderer(Shader &b, Shader &l):
 	glGenTextures(1, &gColor);
 	glBindTexture(GL_TEXTURE_2D, gColor);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F,
-			960, 540, 0, GL_RGBA, GL_FLOAT, NULL);
+			1920, 1080, 0, GL_RGBA, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2,
@@ -39,7 +39,7 @@ Renderer::Renderer(Shader &b, Shader &l):
 
 	glGenRenderbuffers(1, &rbo);
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 960, 540);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 1920, 1080);
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
 			GL_RENDERBUFFER, rbo);
@@ -110,7 +110,7 @@ void Renderer::endDeferredRender() {
 
 void Renderer::transferDepthBuffer() {
 	glBlitNamedFramebuffer(gBuffer, 0,
-			0, 0, 960, 540, 0, 0, 960, 540,
+			0, 0, 1920, 1080, 0, 0, 1920, 1080,
 			GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 	glEnable(GL_DEPTH_TEST);
 }

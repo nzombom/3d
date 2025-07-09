@@ -14,7 +14,7 @@ uniform vec4 color;
 out vec4 FragColor;
 
 void main() {
-	vec2 texCoords = gl_FragCoord.xy / vec2(960, 540);
+	vec2 texCoords = gl_FragCoord.xy / textureSize(gPosition, 0);
 	if (texture(gNormal, texCoords).w == 0) discard;
 	vec3 pos = texture(gPosition, texCoords).rgb;
 	vec3 normal = texture(gNormal, texCoords).rgb;

@@ -5,7 +5,7 @@ SRCS = $(shell find $(SRC_DIR) -name *.cpp)
 OBJS = $(SRCS:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
 DEPS = $(OBJS:.o=.d)
 
-FLAGS = -Wall -Wextra -iquote ./src/headers
+FLAGS = -Wall -Wextra -iquote ./src/headers -MMD
 
 LIBS = -lGL -lGLEW -lSDL3
 

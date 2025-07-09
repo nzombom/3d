@@ -11,7 +11,7 @@ class Renderer {
 	unsigned int rbo;
 	Shader bufferShader;
 	Shader deferredMtlShader;
-	Mesh sphere = generateSphere(8);
+	Mesh sphere = generateSphere(16);
 
 	public:
 	Renderer(Shader &, Shader &);
