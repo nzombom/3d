@@ -11,7 +11,7 @@ uniform vec3 lightStrength;
 uniform float lightRadius;
 uniform vec4 color;
 
-out vec4 FragColor;
+layout (location = 0) out vec4 FragColor;
 
 void main() {
 	vec2 texCoords = gl_FragCoord.xy / textureSize(gPosition, 0);

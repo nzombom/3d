@@ -6,24 +6,35 @@
 #include "meshUtils.hpp"
 
 class Renderer {
+	unsigned int fBuffer;
+	unsigned int fImage;
+	unsigned int frbo;
+
 	unsigned int gBuffer;
 	unsigned int gPosition, gNormal, gColor;
-	unsigned int rbo;
+	unsigned int grbo;
+
 	Shader bufferShader;
 	Shader deferredMtlShader;
+	Shader renderShader;
 	Mesh sphere = generateSphere(16);
+	Mesh quad = simpleQuad();
 
 	public:
-	Renderer(Shader &, Shader &);
+	Renderer(Shader &, Shader &, Shader &);
 	~Renderer();
 
-	void beginBufferRender();
+	void beginGBuffer();
 	void renderMeshBuffered(Mesh &, Transform, Camera);
-	void endBufferRender();
+	void endGBuffer();
 
-	void beginDeferredRender();
+	void beginRender();
+	void endRender();
+	void finalRenderToScreen();
+
+	void beginDeferred();
 	void renderDeferredLighting(Camera, Light);
-	void endDeferredRender();
+	void endDeferred();
 
 	void transferDepthBuffer();
 	void renderMeshForward(Mesh &, Transform, Camera, Shader &);

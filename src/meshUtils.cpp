@@ -86,3 +86,14 @@ Mesh generateSphere(unsigned int n) {
 	}
 	return { vs, m.idxs };
 }
+
+Mesh simpleQuad() {
+	std::vector<Vertex> vs = {
+		{ { -1, -1, 0 }, { 0, 0, 1 } },
+		{ { 1, -1, 0 }, { 0, 0, 1 } },
+		{ { 1, 1, 0 }, { 0, 0, 1 } },
+		{ { -1, 1, 0 }, { 0, 0, 1 } },
+	};
+	std::vector<unsigned int> idxs = { 0, 1, 2, 0, 2, 3 };
+	return { vs, idxs };
+}

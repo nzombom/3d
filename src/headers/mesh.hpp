@@ -25,13 +25,4 @@ class Mesh {
 	void draw();
 };
 
-struct Transform {
-	vector p;
-	quat r;
-	vector s;
-};
-inline vector IDP = { 0, 0, 0 };
-inline quat IDR = { 1, { 0, 0, 0 } };
-inline vector IDS = { 1, 1, 1 };
-
 #endif

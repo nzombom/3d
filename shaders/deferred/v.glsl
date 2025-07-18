@@ -8,8 +8,6 @@ uniform vec3 vTranslate;
 uniform vec4 vRotate;
 uniform mat4 projection;
 
-out vec3 pos;
-out vec2 texCoords;
 out vec3 cameraPos;
 
 vec3 rotate(vec3 v, vec4 q) {

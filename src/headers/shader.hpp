@@ -47,6 +47,7 @@ class Shader {
 	void setVector(std::string, vector);
 	void setQuat(std::string, quat);
 	void setMatrix(std::string, matrix);
+	void applyTransform(Transform);
 	void applyCamera(Camera);
 	void applyLight(Light);
 };

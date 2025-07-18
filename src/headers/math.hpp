@@ -54,7 +54,8 @@ struct vector {
 		return std::sqrt(slen());
 	}
 	vector normalize() {
-		return *this / len();
+		if (slen() > 0) return *this / len();
+		return *this;
 	}
 };
 
@@ -139,5 +140,14 @@ struct quat {
 struct matrix {
 	float v[16];
 };
+
+struct Transform {
+	vector p;
+	quat r;
+	vector s;
+};
+inline vector IDP = { 0, 0, 0 };
+inline quat IDR = { 1, { 0, 0, 0 } };
+inline vector IDS = { 1, 1, 1 };
 
 #endif

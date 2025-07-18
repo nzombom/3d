@@ -9,4 +9,6 @@ Mesh subdivideMesh(Mesh m, unsigned int n);
 
 Mesh generateSphere(unsigned int n);
 
+Mesh simpleQuad();
+
 #endif

@@ -118,6 +118,11 @@ void Shader::setMatrix(string name, matrix value) {
 	glUniformMatrix4fv(glGetUniformLocation(id, name.c_str()),
 			1, false, value.v);
 }
+void Shader::applyTransform(Transform t) {
+	setVector("mTranslate", t.p);
+	setQuat("mRotate", t.r);
+	setVector("mScale", t.s);
+}
 void Shader::applyCamera(Camera c) {
 	setVector("vTranslate", -c.p);
 	setQuat("vRotate", c.r.conj());

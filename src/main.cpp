@@ -7,7 +7,7 @@
 #include "shader.hpp"
 #include "mesh.hpp"
 #include "meshUtils.hpp"
-#include "renderer.hpp"
+#include "framebuffer.hpp"
 #include "input.hpp"
 
 bool quit = false;
@@ -24,6 +24,7 @@ std::vector<InputControl> controls = {
 	{ INPUT_KEYBOARD, { .k = SDLK_L } },
 	{ INPUT_KEYBOARD, { .k = SDLK_U } },
 	{ INPUT_KEYBOARD, { .k = SDLK_O } },
+	{ INPUT_KEYBOARD, { .k = SDLK_SPACE } },
 };
 InputState input = InputState(controls);
 
@@ -50,23 +51,34 @@ int main() {
 	glewInit();
 	glViewport(0, 0, 1920, 1080);
 
-	Shader bufferShader("shaders/bufferv.glsl",
-			"shaders/bufferf.glsl");
-	Shader deferredScreenShader("shaders/deferredv.glsl",
-			"shaders/deferredf.glsl");
-	Shader lightShader("shaders/bufferv.glsl",
-			"shaders/lightf.glsl");
+	Shader bufferShader("shaders/buffer/v.glsl",
+			"shaders/buffer/f.glsl");
+	Shader deferredScreenShader("shaders/deferred/v.glsl",
+			"shaders/deferred/f.glsl");
+	Shader lightShader("shaders/buffer/v.glsl",
+			"shaders/light/f.glsl");
 
 	bufferShader.compile();
 	deferredScreenShader.compile();
 	lightShader.compile();
 
-	Renderer r(bufferShader, deferredScreenShader);
+	FramebufferTexture gPosition(GL_RGBA16F, GL_RGBA, GL_FLOAT,
+			GL_COLOR_ATTACHMENT0);
+	FramebufferTexture gNormal(GL_RGBA16F, GL_RGBA, GL_FLOAT,
+			GL_COLOR_ATTACHMENT1);
+	FramebufferTexture gColor(GL_RGBA16F, GL_RGBA, GL_FLOAT,
+			GL_COLOR_ATTACHMENT2);
+	Renderbuffer gRbo(GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL_ATTACHMENT);
+	Framebuffer gBuffer({ gPosition, gNormal, gColor }, gRbo);
+	gBuffer.size(1920, 1080);
 
+	Mesh deferredLightRadius = generateSphere(8);
 	Mesh sphere = generateSphere(16);
 	Mesh lightSphere = generateSphere(8);
 
 	vector cPos = { 0, 0, 4 };
+	vector cVel = { 0, 0, 0 };
+	vector cAccel = { 0, 0, 0 };
 	quat cDir = IDR;
 
 	unsigned int prev = 0;
@@ -84,32 +96,63 @@ int main() {
 		if (input.s(9)) cDir *= quat{ cost, vector{ 0, -1, 0 } * sint };
 		if (input.s(10)) cDir *= quat{ cost, vector{ 0, 0, 1 } * sint };
 		if (input.s(11)) cDir *= quat{ cost, vector{ 0, 0, -1 } * sint };
-		if (input.s(0)) cPos -= cDir.rotate(vector{ 0, 0, 0.25 });
-		if (input.s(1)) cPos += cDir.rotate(vector{ 0, 0, 0.25 });
-		if (input.s(2)) cPos -= cDir.rotate(vector{ 0.25, 0, 0 });
-		if (input.s(3)) cPos += cDir.rotate(vector{ 0.25, 0, 0 });
-		if (input.s(4)) cPos -= cDir.rotate(vector{ 0, 0.25, 0 });
-		if (input.s(5)) cPos += cDir.rotate(vector{ 0, 0.25, 0 });
 		cDir.renormalize();
+		cAccel = { 0, 0, 0 };
+		if (input.s(12)) cAccel = -cVel;
+		else {
+			if (input.s(0)) cAccel -= cDir.rotate(vector{ 0, 0, 1 });
+			if (input.s(1)) cAccel += cDir.rotate(vector{ 0, 0, 1 });
+			if (input.s(2)) cAccel -= cDir.rotate(vector{ 1, 0, 0 });
+			if (input.s(3)) cAccel += cDir.rotate(vector{ 1, 0, 0 });
+			if (input.s(4)) cAccel -= cDir.rotate(vector{ 0, 1, 0 });
+			if (input.s(5)) cAccel += cDir.rotate(vector{ 0, 1, 0 });
+		}
+		cVel += cAccel.normalize() / 256.0;
+		cPos += cVel;
 		Camera cam = { cPos, cDir,
-			1, 64, M_PI / 2.0, 16.0 / 9.0 };
+			0.0625, 4096, M_PI / 2.0, 16.0 / 9.0 };
 
 		Transform st = { { 16, 0, 0 }, IDR, IDS * 4, };
 		Light light = { { 0, 0, 0 }, { 4, 4, 4 }, 32 };
 		Transform lt = { { 0, 0, 0 }, IDR, IDS };
 
-		r.beginBufferRender();
-		r.renderMeshBuffered(sphere, st, cam);
-		r.endBufferRender();
+		gBuffer.bind();
+		gBuffer.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_DEPTH_TEST);
+		gBuffer.drawTo();
 
-		glClearColor(0, 0, 0, 1);
+		bufferShader.use();
+		bufferShader.applyTransform(st);
+		bufferShader.applyCamera(cam);
+		sphere.draw();
+
+		gBuffer.unbind();
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		r.beginDeferredRender();
-		r.renderDeferredLighting(cam, light);
-		r.endDeferredRender();
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ONE, GL_ONE);
+		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_FRONT);
 
-		r.transferDepthBuffer();
-		r.renderMeshForward(lightSphere, lt, cam, lightShader);
+		deferredScreenShader.use();
+		gBuffer.drawFrom();
+		deferredScreenShader.applyLight(light);
+		deferredScreenShader.applyCamera(cam);
+		deferredScreenShader.setVector("mTranslate", light.p);
+		deferredScreenShader.setVector("mScale", IDS * light.r);
+		deferredLightRadius.draw();
+
+		glDisable(GL_BLEND);
+		glDisable(GL_CULL_FACE);
+
+		gBuffer.blitTo(0, GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_DEPTH_TEST);
+
+		lightShader.use();
+		lightShader.applyTransform(lt);
+		lightShader.applyCamera(cam);
+		lightSphere.draw();
 
 		SDL_GL_SwapWindow(window);
 	}
