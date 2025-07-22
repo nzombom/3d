@@ -10,10 +10,11 @@ FLAGS = -Wall -Wextra -iquote ./src/headers -MMD
 LIBS = -lGL -lGLEW -lSDL3
 
 main: $(OBJS)
-	g++ $(OBJS) -o $@ $(LIBS)
+	$(CXX) $(OBJS) -o $@ $(LIBS)
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
-	g++ $(FLAGS) -c $< -o $@
+	mkdir -p $(dir $@)
+	$(CXX) $(FLAGS) -c $< -o $@
 
 clean:
 	rm -r $(BUILD_DIR)/*

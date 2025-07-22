@@ -113,7 +113,7 @@ int main() {
 			0.0625, 4096, M_PI / 2.0, 16.0 / 9.0 };
 
 		Transform st = { { 16, 0, 0 }, IDR, IDS * 4, };
-		Light light = { { 0, 0, 0 }, { 4, 4, 4 }, 32 };
+		Light light = { { 0, 0, 0 }, { 2, 2, 2 }, 32 };
 		Transform lt = { { 0, 0, 0 }, IDR, IDS };
 
 		gBuffer.bind();
