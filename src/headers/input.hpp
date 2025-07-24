@@ -21,5 +21,6 @@ class InputState {
 	InputState(std::vector<InputControl>);
 
 	void update(SDL_Event);
-	bool s(int);
+	bool s(unsigned int);
+	float getAxis(unsigned int, unsigned int);
 };

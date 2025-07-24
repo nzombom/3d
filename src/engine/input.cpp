@@ -35,6 +35,9 @@ void InputState::update(SDL_Event e) {
 	} catch (std::out_of_range & e) {};
 }
 
-bool InputState::s(int v) {
+bool InputState::s(unsigned int v) {
 	return state.at(v);
+}
+float InputState::getAxis(unsigned int l, unsigned int r) {
+	return (s(l) ? -1 : 0) + (s(r) ? 1 : 0);
 }

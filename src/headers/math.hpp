@@ -8,52 +8,52 @@ struct vector {
 	float y;
 	float z;
 
-	vector operator-() {
+	vector operator-() const {
 		return { -x, -y, -z };
 	}
-	vector operator+(vector b) {
+	vector operator+(vector b) const {
 		return { x + b.x, y + b.y, z + b.z };
 	}
 	vector * operator+=(vector b) {
 		x += b.x; y += b.y; z += b.z;
 		return this;
 	}
-	vector operator-(vector b) {
+	vector operator-(vector b) const {
 		return { x - b.x, y - b.y, z - b.z };
 	}
 	vector * operator-=(vector b) {
 		x -= b.x; y -= b.y; z -= b.z;
 		return this;
 	}
-	vector operator*(vector b) {
+	vector operator*(vector b) const {
 		return { x * b.x, y * b.y, z * b.z };
 	}
-	vector operator/(vector b) {
+	vector operator/(vector b) const {
 		return { x / b.x, y / b.y, z / b.z };
 	}
-	vector operator*(float s) {
+	vector operator*(float s) const {
 		return { x * s, y * s, z * s };
 	}
-	vector operator/(float s) {
+	vector operator/(float s) const {
 		return { x / s, y / s, z / s };
 	}
-	float operator|(vector b) {
+	float operator|(vector b) const {
 		return x * b.x + y * b.y + z * b.z;
 	}
-	vector operator&(vector b) {
+	vector operator&(vector b) const {
 		return {
 			y * b.z - z * b.y,
 			z * b.x - x * b.z,
 			x * b.y - y * b.x,
 		};
 	}
-	float slen() {
+	float slen() const {
 		return x * x + y * y + z * z;
 	}
-	float len() {
+	float len() const {
 		return std::sqrt(slen());
 	}
-	vector normalize() {
+	vector normalize() const {
 		if (slen() > 0) return *this / len();
 		return *this;
 	}
@@ -102,7 +102,7 @@ struct quat {
 	float w;
 	vector r;
 
-	quat normalize() {
+	quat normalize() const {
 		float len = std::sqrt(w * w + r.slen());
 		return { w / len, r / len };
 	}
@@ -112,10 +112,10 @@ struct quat {
 		r = r / len;
 		return this;
 	}
-	quat conj() {
+	quat conj() const {
 		return { w, -r };
 	}
-	quat operator*(quat b) {
+	quat operator*(quat b) const {
 		return { w * b.w - (r | b.r), b.r * w + r * b.w + (r & b.r) };
 	}
 	quat * operator*=(quat b) {
@@ -123,7 +123,7 @@ struct quat {
 		r = { b.r * w + r * b.w + (r & b.r) };
 		return this;
 	}
-	quat operator/(quat b) {
+	quat operator/(quat b) const {
 		return *this * b.conj();
 	}
 	quat * operator/=(quat b) {
@@ -132,10 +132,13 @@ struct quat {
 		r = q.r;
 		return this;
 	}
-	vector rotate(vector v) {
+	vector rotate(vector v) const {
 		return v + ((r + r) & ((r & v) + v * w));
 	}
 };
+inline quat qFromAA(vector axis, float angle) {
+	return { std::cos(angle), axis * std::sin(angle) };
+}
 
 struct matrix {
 	float v[16];
@@ -146,8 +149,8 @@ struct Transform {
 	quat r;
 	vector s;
 };
-inline vector IDP = { 0, 0, 0 };
-inline quat IDR = { 1, { 0, 0, 0 } };
-inline vector IDS = { 1, 1, 1 };
+inline const vector IDP = { 0, 0, 0 };
+inline const quat IDR = { 1, { 0, 0, 0 } };
+inline const vector IDS = { 1, 1, 1 };
 
 #endif

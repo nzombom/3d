@@ -55,7 +55,7 @@ int main() {
 			"shaders/buffer/f.glsl");
 	Shader deferredScreenShader("shaders/deferred/v.glsl",
 			"shaders/deferred/f.glsl");
-	Shader lightShader("shaders/buffer/v.glsl",
+	Shader lightShader("shaders/light/v.glsl",
 			"shaders/light/f.glsl");
 
 	bufferShader.compile();
@@ -66,17 +66,16 @@ int main() {
 			GL_COLOR_ATTACHMENT0);
 	FramebufferTexture gNormal(GL_RGBA16F, GL_RGBA, GL_FLOAT,
 			GL_COLOR_ATTACHMENT1);
-	FramebufferTexture gColor(GL_RGBA16F, GL_RGBA, GL_FLOAT,
-			GL_COLOR_ATTACHMENT2);
+	FramebufferTexture gColor(GL_RGBA16F, GL_RGBA, GL_FLOAT, GL_COLOR_ATTACHMENT2);
 	Renderbuffer gRbo(GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL_ATTACHMENT);
 	Framebuffer gBuffer({ gPosition, gNormal, gColor }, gRbo);
 	gBuffer.size(1920, 1080);
 
 	Mesh deferredLightRadius = generateSphere(8);
-	Mesh sphere = generateSphere(16);
-	Mesh lightSphere = generateSphere(8);
+	Mesh sphere = generateSphere(32);
+	Mesh lightSphere = generateSphere(32);
 
-	vector cPos = { 0, 0, 4 };
+	vector cPos = { 0, 0, 8 };
 	vector cVel = { 0, 0, 0 };
 	vector cAccel = { 0, 0, 0 };
 	quat cDir = IDR;
@@ -88,33 +87,26 @@ int main() {
 		unsigned int dt = t - prev;
 		prev = t;
 
-		float cost = std::cos(M_PI / 256.0);
-		float sint = std::sin(M_PI / 256.0);
-		if (input.s(6)) cDir *= quat{ cost, vector{ 1, 0, 0 } * sint };
-		if (input.s(7)) cDir *= quat{ cost, vector{ -1, 0, 0 } * sint };
-		if (input.s(8)) cDir *= quat{ cost, vector{ 0, 1, 0 } * sint };
-		if (input.s(9)) cDir *= quat{ cost, vector{ 0, -1, 0 } * sint };
-		if (input.s(10)) cDir *= quat{ cost, vector{ 0, 0, 1 } * sint };
-		if (input.s(11)) cDir *= quat{ cost, vector{ 0, 0, -1 } * sint };
+		float angle = M_PI / 256.0;
+		cDir *= qFromAA(vector{ -1, 0, 0 }, input.getAxis(6, 7) * angle);
+		cDir *= qFromAA(vector{ 0, -1, 0 }, input.getAxis(8, 9) * angle);
+		cDir *= qFromAA(vector{ 0, 0, -1 }, input.getAxis(10, 11) * angle);
 		cDir.renormalize();
 		cAccel = { 0, 0, 0 };
 		if (input.s(12)) cAccel = -cVel;
 		else {
-			if (input.s(0)) cAccel -= cDir.rotate(vector{ 0, 0, 1 });
-			if (input.s(1)) cAccel += cDir.rotate(vector{ 0, 0, 1 });
-			if (input.s(2)) cAccel -= cDir.rotate(vector{ 1, 0, 0 });
-			if (input.s(3)) cAccel += cDir.rotate(vector{ 1, 0, 0 });
-			if (input.s(4)) cAccel -= cDir.rotate(vector{ 0, 1, 0 });
-			if (input.s(5)) cAccel += cDir.rotate(vector{ 0, 1, 0 });
+			cAccel += cDir.rotate(vector{ 0, 0, 1 } * input.getAxis(0, 1));
+			cAccel += cDir.rotate(vector{ 1, 0, 0 } * input.getAxis(2, 3));
+			cAccel += cDir.rotate(vector{ 0, 1, 0 } * input.getAxis(4, 5));
 		}
 		cVel += cAccel.normalize() / 256.0;
 		cPos += cVel;
 		Camera cam = { cPos, cDir,
-			0.0625, 4096, M_PI / 2.0, 16.0 / 9.0 };
+			1.0 / 64.0, 1024, M_PI / 2.0, 16.0 / 9.0 };
 
-		Transform st = { { 16, 0, 0 }, IDR, IDS * 4, };
-		Light light = { { 0, 0, 0 }, { 2, 2, 2 }, 32 };
-		Transform lt = { { 0, 0, 0 }, IDR, IDS };
+		Transform st = { { 16, 0, 0 }, IDR, IDS };
+		Light sun = { { 0, 0, 0 }, { 4, 4, 4 }, 32 };
+		Transform sunt = { { 0, 0, 0 }, IDR, IDS * 2 };
 
 		gBuffer.bind();
 		gBuffer.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -122,8 +114,8 @@ int main() {
 		gBuffer.drawTo();
 
 		bufferShader.use();
-		bufferShader.applyTransform(st);
 		bufferShader.applyCamera(cam);
+		bufferShader.applyTransform(st);
 		sphere.draw();
 
 		gBuffer.unbind();
@@ -137,20 +129,19 @@ int main() {
 
 		deferredScreenShader.use();
 		gBuffer.drawFrom();
-		deferredScreenShader.applyLight(light);
 		deferredScreenShader.applyCamera(cam);
-		deferredScreenShader.setVector("mTranslate", light.p);
-		deferredScreenShader.setVector("mScale", IDS * light.r);
+		deferredScreenShader.applyLight(sun);
+		deferredScreenShader.setVector("mTranslate", sun.p);
+		deferredScreenShader.setVector("mScale", IDS * sun.r);
 		deferredLightRadius.draw();
 
 		glDisable(GL_BLEND);
-		glDisable(GL_CULL_FACE);
-
+		glCullFace(GL_BACK);
 		gBuffer.blitTo(0, GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 
 		lightShader.use();
-		lightShader.applyTransform(lt);
+		lightShader.applyTransform(sunt);
 		lightShader.applyCamera(cam);
 		lightSphere.draw();
 
