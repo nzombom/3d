@@ -15,14 +15,18 @@ struct vector {
 		return { x + b.x, y + b.y, z + b.z };
 	}
 	vector * operator+=(vector b) {
-		x += b.x; y += b.y; z += b.z;
+		x += b.x;
+		y += b.y;
+		z += b.z;
 		return this;
 	}
 	vector operator-(vector b) const {
 		return { x - b.x, y - b.y, z - b.z };
 	}
 	vector * operator-=(vector b) {
-		x -= b.x; y -= b.y; z -= b.z;
+		x -= b.x;
+		y -= b.y;
+		z -= b.z;
 		return this;
 	}
 	vector operator*(vector b) const {
@@ -94,7 +98,8 @@ struct vector2 {
 		return std::sqrt(slen());
 	}
 	vector2 normalize() {
-		return *this / len();
+		if (slen() > 0) return *this / len();
+		return *this;
 	}
 };
 

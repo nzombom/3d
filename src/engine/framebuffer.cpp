@@ -2,7 +2,7 @@
 #include <vector>
 #include <GL/glew.h>
 
-#include "framebuffer.hpp"
+#include "engine/framebuffer.hpp"
 
 FramebufferTexture::FramebufferTexture(GLenum fi, GLenum f, GLenum t, GLenum a)
 	: formati(fi), format(f), datatype(t), attachment(a) {
@@ -38,11 +38,11 @@ std::runtime_error Framebuffer::checkError(unsigned int status) {
 	switch (status) {
 		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
 			return std::runtime_error("\e[1;31merror with framebuffer: \e[m"
-					"incomplete attachment");
+									  "incomplete attachment");
 			break;
 		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
 			return std::runtime_error("\e[1;31merror with framebuffer: \e[m"
-					"missing attachment");
+									  "missing attachment");
 			break;
 		default:
 			return std::runtime_error("\e[1;31merror with framebuffer\e[m");
@@ -57,7 +57,7 @@ Framebuffer::Framebuffer(std::vector<FramebufferTexture> t)
 	for (unsigned int i = 0; i < textures.size(); i++) {
 		glBindTexture(GL_TEXTURE_2D, textures.at(i).id);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, textures.at(i).attachment,
-				GL_TEXTURE_2D, textures.at(i).id, 0);
+			GL_TEXTURE_2D, textures.at(i).id, 0);
 		attachments.push_back(textures.at(i).attachment);
 	}
 
@@ -73,12 +73,12 @@ Framebuffer::Framebuffer(std::vector<FramebufferTexture> t, Renderbuffer r)
 	for (unsigned int i = 0; i < textures.size(); i++) {
 		glBindTexture(GL_TEXTURE_2D, textures.at(i).id);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, textures.at(i).attachment,
-				GL_TEXTURE_2D, textures.at(i).id, 0);
+			GL_TEXTURE_2D, textures.at(i).id, 0);
 		attachments.push_back(textures.at(i).attachment);
 	}
 
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-			GL_RENDERBUFFER, rbo->id);
+		GL_RENDERBUFFER, rbo->id);
 
 	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	if (status != GL_FRAMEBUFFER_COMPLETE) throw checkError(status);
@@ -120,11 +120,11 @@ void Framebuffer::drawFrom() {
 
 void Framebuffer::blitTo(unsigned int f, GLbitfield bits) {
 	glBlitNamedFramebuffer(id, f,
-			0, 0, w, h, 0, 0, w, h,
-			bits, GL_NEAREST);
+		0, 0, w, h, 0, 0, w, h,
+		bits, GL_NEAREST);
 }
 void Framebuffer::blitTo(Framebuffer f, GLbitfield bits) {
 	glBlitNamedFramebuffer(id, f.getId(),
-			0, 0, w, h, 0, 0, f.w, f.h,
-			bits, GL_NEAREST);
+		0, 0, w, h, 0, 0, f.w, f.h,
+		bits, GL_NEAREST);
 }

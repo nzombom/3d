@@ -18,9 +18,9 @@ struct Camera {
 		float right = near * std::tan(fov / 2.0);
 		float top = right / aspect;
 		return { near / right, 0, 0, 0,
-			0, near / top, 0, 0,
-			0, 0, -(far + near) / (far - near), -1,
-			0, 0, -2 * far * near / (far - near), 0 };
+				0, near / top, 0, 0,
+				0, 0, -(far + near) / (far - near), -1,
+				0, 0, -2 * far * near / (far - near), 0 };
 	}
 };
 
@@ -34,7 +34,7 @@ class Shader {
 	unsigned int id;
 	std::string vPath, fPath;
 
-	public:
+  public:
 	Shader(std::string, std::string);
 	~Shader();
 
@@ -47,9 +47,6 @@ class Shader {
 	void setVector(std::string, vector);
 	void setQuat(std::string, quat);
 	void setMatrix(std::string, matrix);
-	void applyTransform(Transform);
-	void applyCamera(Camera);
-	void applyLight(Light);
 };
 
 #endif

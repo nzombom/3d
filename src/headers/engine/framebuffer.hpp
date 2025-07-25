@@ -14,7 +14,7 @@ class FramebufferTexture {
 
 	void size(unsigned int, unsigned int);
 
-	public:
+  public:
 	FramebufferTexture(GLenum, GLenum, GLenum, GLenum);
 };
 
@@ -26,7 +26,7 @@ class Renderbuffer {
 
 	void size(unsigned int, unsigned int);
 
-	public:
+  public:
 	Renderbuffer(GLenum, GLenum);
 };
 
@@ -38,7 +38,7 @@ class Framebuffer {
 
 	std::runtime_error checkError(unsigned int);
 
-	public:
+  public:
 	Framebuffer();
 	Framebuffer(std::vector<FramebufferTexture>);
 	Framebuffer(std::vector<FramebufferTexture>, Renderbuffer r);

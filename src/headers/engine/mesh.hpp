@@ -15,7 +15,7 @@ class Mesh {
 	unsigned int VBO;
 	unsigned int EBO;
 
-	public:
+  public:
 	std::vector<Vertex> vs;
 	std::vector<unsigned int> idxs;
 

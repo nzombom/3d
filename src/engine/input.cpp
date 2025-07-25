@@ -3,7 +3,7 @@
 #include <map>
 #include <SDL3/SDL.h>
 
-#include "input.hpp"
+#include "engine/input.hpp"
 
 InputState::InputState(std::vector<InputControl> controls) {
 	state.insert(state.begin(), controls.size(), false);
@@ -32,7 +32,7 @@ void InputState::update(SDL_Event e) {
 				state.at(mControlMap.at(e.button.button)) = false;
 				break;
 		}
-	} catch (std::out_of_range & e) {};
+	} catch (std::out_of_range& e) {};
 }
 
 bool InputState::s(unsigned int v) {

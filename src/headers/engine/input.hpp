@@ -17,7 +17,7 @@ class InputState {
 	std::map<unsigned char, unsigned int> mControlMap;
 	std::vector<bool> state;
 
-	public:
+  public:
 	InputState(std::vector<InputControl>);
 
 	void update(SDL_Event);

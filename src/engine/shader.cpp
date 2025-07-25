@@ -6,8 +6,8 @@ using string = std::string;
 #include <fstream>
 #include <GL/glew.h>
 
-#include "shader.hpp"
-#include "math.hpp"
+#include "engine/shader.hpp"
+#include "engine/math.hpp"
 
 Shader::Shader(string v, string f) {
 	vPath = v;
@@ -38,8 +38,8 @@ void Shader::compile() {
 	fCodeStream << fFile.rdbuf();
 	string vCode = vCodeStream.str();
 	string fCode = fCodeStream.str();
-	const char* vcCode = vCode.c_str();
-	const char* fcCode = fCode.c_str();
+	const char * vcCode = vCode.c_str();
+	const char * fcCode = fCode.c_str();
 
 	vFile.close();
 	fFile.close();
@@ -108,28 +108,13 @@ void Shader::setFloat(string name, float value) {
 }
 void Shader::setVector(string name, vector value) {
 	glUniform3f(glGetUniformLocation(id, name.c_str()),
-			value.x, value.y, value.z);
+		value.x, value.y, value.z);
 }
 void Shader::setQuat(string name, quat value) {
 	glUniform4f(glGetUniformLocation(id, name.c_str()),
-			value.r.x, value.r.y, value.r.z, value.w);
+		value.r.x, value.r.y, value.r.z, value.w);
 }
 void Shader::setMatrix(string name, matrix value) {
 	glUniformMatrix4fv(glGetUniformLocation(id, name.c_str()),
-			1, false, value.v);
-}
-void Shader::applyTransform(Transform t) {
-	setVector("mTranslate", t.p);
-	setQuat("mRotate", t.r);
-	setVector("mScale", t.s);
-}
-void Shader::applyCamera(Camera c) {
-	setVector("vTranslate", -c.p);
-	setQuat("vRotate", c.r.conj());
-	setMatrix("projection", c.projectionMatrix());
-}
-void Shader::applyLight(Light l) {
-	setVector("lightPos", l.p);
-	setVector("lightStrength", l.c);
-	setFloat("lightRadius", l.r);
+		1, false, value.v);
 }

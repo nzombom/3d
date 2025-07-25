@@ -1,8 +1,8 @@
 #include <vector>
 #include <GL/glew.h>
 
-#include "mesh.hpp"
-#include "math.hpp"
+#include "engine/mesh.hpp"
+#include "engine/math.hpp"
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices) {
 	vs = vertices;
@@ -16,18 +16,18 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices) {
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, vs.size() * sizeof(Vertex),
-			vs.data(), GL_STATIC_DRAW);
+		vs.data(), GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, idxs.size() * sizeof(unsigned int),
-			idxs.data(), GL_STATIC_DRAW);
+		idxs.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, false,
-			sizeof(Vertex), (void*)offsetof(Vertex, p));
+		sizeof(Vertex), (void *)offsetof(Vertex, p));
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false,
-			sizeof(Vertex), (void*)offsetof(Vertex, n));
+		sizeof(Vertex), (void *)offsetof(Vertex, n));
 
 	glBindVertexArray(0);
 }

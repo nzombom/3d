@@ -1,9 +1,9 @@
 #include <iostream>
 #include <vector>
 
-#include "meshUtils.hpp"
-#include "math.hpp"
-#include "mesh.hpp"
+#include "engine/meshUtils.hpp"
+#include "engine/math.hpp"
+#include "engine/mesh.hpp"
 
 Mesh generateCube() {
 	std::vector<Vertex> vs = {

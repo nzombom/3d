@@ -3,12 +3,14 @@
 #include <SDL3/SDL.h>
 #include <GL/glew.h>
 
-#include "math.hpp"
-#include "shader.hpp"
-#include "mesh.hpp"
-#include "meshUtils.hpp"
-#include "framebuffer.hpp"
-#include "input.hpp"
+#include "engine/math.hpp"
+#include "engine/shader.hpp"
+#include "engine/mesh.hpp"
+#include "engine/meshUtils.hpp"
+#include "engine/framebuffer.hpp"
+#include "engine/input.hpp"
+#include "celestial.hpp"
+#include "planet.hpp"
 
 bool quit = false;
 std::vector<InputControl> controls = {
@@ -30,17 +32,18 @@ InputState input = InputState(controls);
 
 void event() {
 	SDL_Event e;
-	while (SDL_PollEvent(&e)) switch (e.type) {
-		case SDL_EVENT_QUIT:
-			quit = true;
-			break;
-		case SDL_EVENT_KEY_DOWN:
-		case SDL_EVENT_KEY_UP:
-		case SDL_EVENT_MOUSE_BUTTON_DOWN:
-		case SDL_EVENT_MOUSE_BUTTON_UP:
-			input.update(e);
-			break;
-	}
+	while (SDL_PollEvent(&e))
+		switch (e.type) {
+			case SDL_EVENT_QUIT:
+				quit = true;
+				break;
+			case SDL_EVENT_KEY_DOWN:
+			case SDL_EVENT_KEY_UP:
+			case SDL_EVENT_MOUSE_BUTTON_DOWN:
+			case SDL_EVENT_MOUSE_BUTTON_UP:
+				input.update(e);
+				break;
+		}
 }
 
 int main() {
@@ -51,39 +54,32 @@ int main() {
 	glewInit();
 	glViewport(0, 0, 1920, 1080);
 
-	Shader bufferShader("shaders/buffer/v.glsl",
-			"shaders/buffer/f.glsl");
-	Shader deferredScreenShader("shaders/deferred/v.glsl",
-			"shaders/deferred/f.glsl");
-	Shader lightShader("shaders/light/v.glsl",
-			"shaders/light/f.glsl");
+	Shader shaderSolid("shaders/solid/v.glsl",
+		"shaders/solid/f.glsl");
+	Shader shaderSun("shaders/light/v.glsl",
+		"shaders/light/f.glsl");
 
-	bufferShader.compile();
-	deferredScreenShader.compile();
-	lightShader.compile();
+	shaderSolid.compile();
+	shaderSun.compile();
 
-	FramebufferTexture gPosition(GL_RGBA16F, GL_RGBA, GL_FLOAT,
-			GL_COLOR_ATTACHMENT0);
-	FramebufferTexture gNormal(GL_RGBA16F, GL_RGBA, GL_FLOAT,
-			GL_COLOR_ATTACHMENT1);
-	FramebufferTexture gColor(GL_RGBA16F, GL_RGBA, GL_FLOAT, GL_COLOR_ATTACHMENT2);
-	Renderbuffer gRbo(GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL_ATTACHMENT);
-	Framebuffer gBuffer({ gPosition, gNormal, gColor }, gRbo);
-	gBuffer.size(1920, 1080);
-
-	Mesh deferredLightRadius = generateSphere(8);
 	Mesh sphere = generateSphere(32);
-	Mesh lightSphere = generateSphere(32);
 
-	vector cPos = { 0, 0, 8 };
+	Planet sun("The Sun", { 0, 0, 0 }, { 0, 0, 0 }, 32, 16, sphere);
+	Planet earth("Earth", { 256, 0, 0 }, { 0, 0, 8 }, 16, 1, sphere);
+	Planet anti("Anti-Earth", { -256, 0, 0 }, { 0, 0, -8 }, 16, 1, sphere);
+	std::vector<Celestial *> celestials{ &sun, &earth, &anti };
+
+	vector cPos = { 0, 0, 256 };
 	vector cVel = { 0, 0, 0 };
 	vector cAccel = { 0, 0, 0 };
 	quat cDir = IDR;
 
-	unsigned int prev = 0;
+	const float baseAccel = 8.0;
+
+	unsigned long long prev = 0;
 	while (!quit) {
 		event();
-		unsigned int t = SDL_GetTicks();
+		unsigned long long t = SDL_GetTicks();
 		unsigned int dt = t - prev;
 		prev = t;
 
@@ -95,55 +91,37 @@ int main() {
 		cAccel = { 0, 0, 0 };
 		if (input.s(12)) cAccel = -cVel;
 		else {
-			cAccel += cDir.rotate(vector{ 0, 0, 1 } * input.getAxis(0, 1));
-			cAccel += cDir.rotate(vector{ 1, 0, 0 } * input.getAxis(2, 3));
-			cAccel += cDir.rotate(vector{ 0, 1, 0 } * input.getAxis(4, 5));
+			cAccel += cDir.rotate(vector{ 0, 0, 1 }) * input.getAxis(0, 1);
+			cAccel += cDir.rotate(vector{ 1, 0, 0 }) * input.getAxis(2, 3);
+			cAccel += cDir.rotate(vector{ 0, 1, 0 }) * input.getAxis(4, 5);
 		}
-		cVel += cAccel.normalize() / 256.0;
-		cPos += cVel;
-		Camera cam = { cPos, cDir,
-			1.0 / 64.0, 1024, M_PI / 2.0, 16.0 / 9.0 };
+		cVel += cAccel.normalize() * baseAccel * dt / 1000.0;
+		cPos += cVel * dt / 1000.0;
+		Camera cam = { cPos, cDir, 1.0 / 16.0, 8192, M_PI / 2.0, 16.0 / 9.0 };
 
-		Transform st = { { 16, 0, 0 }, IDR, IDS };
-		Light sun = { { 0, 0, 0 }, { 4, 4, 4 }, 32 };
-		Transform sunt = { { 0, 0, 0 }, IDR, IDS * 2 };
+		for (unsigned int i = 0; i < celestials.size(); i++) {
+			celestials.at(i)->updateVel(celestials, dt);
+		}
+		for (unsigned int i = 0; i < celestials.size(); i++) {
+			celestials.at(i)->updatePos(celestials, dt);
+		}
 
-		gBuffer.bind();
-		gBuffer.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
-		gBuffer.drawTo();
-
-		bufferShader.use();
-		bufferShader.applyCamera(cam);
-		bufferShader.applyTransform(st);
-		sphere.draw();
-
-		gBuffer.unbind();
-
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_ONE, GL_ONE);
-		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_FRONT);
 
-		deferredScreenShader.use();
-		gBuffer.drawFrom();
-		deferredScreenShader.applyCamera(cam);
-		deferredScreenShader.applyLight(sun);
-		deferredScreenShader.setVector("mTranslate", sun.p);
-		deferredScreenShader.setVector("mScale", IDS * sun.r);
-		deferredLightRadius.draw();
-
-		glDisable(GL_BLEND);
-		glCullFace(GL_BACK);
-		gBuffer.blitTo(0, GL_DEPTH_BUFFER_BIT);
-		glEnable(GL_DEPTH_TEST);
-
-		lightShader.use();
-		lightShader.applyTransform(sunt);
-		lightShader.applyCamera(cam);
-		lightSphere.draw();
+		Light sun = { celestials.at(0)->getPos(), { 2, 2, 2 }, 1024 };
+		for (unsigned int i = 1; i < celestials.size(); i++) {
+			shaderSolid.use();
+			shaderSolid.setVector("view.translate", -cam.p);
+			shaderSolid.setQuat("view.rotate", cam.r.conj());
+			shaderSolid.setMatrix("view.projection", cam.projectionMatrix());
+			celestials.at(i)->draw(shaderSolid);
+		}
+		shaderSun.use();
+		shaderSun.setVector("view.translate", -cam.p);
+		shaderSun.setQuat("view.rotate", cam.r.conj());
+		shaderSun.setMatrix("view.projection", cam.projectionMatrix());
+		celestials.at(0)->draw(shaderSun);
 
 		SDL_GL_SwapWindow(window);
 	}
