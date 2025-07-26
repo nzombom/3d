@@ -140,10 +140,11 @@ struct quat {
 	vector rotate(vector v) const {
 		return v + ((r + r) & ((r & v) + v * w));
 	}
+
+	static inline quat fromAA(vector axis, float angle) {
+		return { std::cos(angle), axis * std::sin(angle) };
+	}
 };
-inline quat qFromAA(vector axis, float angle) {
-	return { std::cos(angle), axis * std::sin(angle) };
-}
 
 struct matrix {
 	float v[16];
