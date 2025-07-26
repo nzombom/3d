@@ -54,6 +54,7 @@ Framebuffer::Framebuffer(std::vector<FramebufferTexture> t)
 	glGenFramebuffers(1, &id);
 	bind();
 
+	attachments.reserve(textures.size());
 	for (unsigned int i = 0; i < textures.size(); i++) {
 		glBindTexture(GL_TEXTURE_2D, textures.at(i).id);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, textures.at(i).attachment,
@@ -70,6 +71,7 @@ Framebuffer::Framebuffer(std::vector<FramebufferTexture> t, Renderbuffer r)
 	glGenFramebuffers(1, &id);
 	bind();
 
+	attachments.reserve(textures.size());
 	for (unsigned int i = 0; i < textures.size(); i++) {
 		glBindTexture(GL_TEXTURE_2D, textures.at(i).id);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, textures.at(i).attachment,

@@ -46,6 +46,8 @@ Mesh generateCube() {
 Mesh subdivideMesh(Mesh m, unsigned int n) {
 	std::vector<Vertex> vs;
 	std::vector<unsigned int> idxs;
+	idxs.reserve(18 * (n + 1) * (n + 2));
+	vs.reserve(6 * (n + 1) * (n + 2));
 	for (int f = 0; f < 12; f++) {
 		vector p0 = m.vs[m.idxs[3 * f]].p;
 		vector p1 = m.vs[m.idxs[3 * f + 1]].p;
@@ -78,13 +80,12 @@ Mesh subdivideMesh(Mesh m, unsigned int n) {
 }
 
 Mesh generateSphere(unsigned int n) {
-	std::vector<Vertex> vs;
 	Mesh m = subdivideMesh(generateCube(), n);
 	for (unsigned int i = 0; i < m.vs.size(); i++) {
 		vector vp = m.vs.at(i).p;
-		vs.push_back({ vp.normalize(), vp.normalize() });
+		m.vs.at(i) = { vp.normalize(), vp.normalize() };
 	}
-	return { vs, m.idxs };
+	return m;
 }
 
 Mesh simpleQuad() {

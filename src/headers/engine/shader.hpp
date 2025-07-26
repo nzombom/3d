@@ -27,7 +27,6 @@ struct Camera {
 struct Light {
 	vector p;
 	vector c;
-	float r;
 };
 
 class Shader {
