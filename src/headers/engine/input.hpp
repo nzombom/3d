@@ -2,8 +2,8 @@
 #include <map>
 #include <SDL3/SDL.h>
 
-#define INPUT_KEYBOARD 0
-#define INPUT_MOUSE 1
+const unsigned char INPUT_KEYBOARD = 0;
+const unsigned char INPUT_MOUSE = 1;
 struct InputControl {
 	unsigned char type;
 	union {

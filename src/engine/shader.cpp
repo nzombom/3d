@@ -1,4 +1,4 @@
-#include <iostream>
+#include <stdexcept>
 #include <cstring>
 #include <string>
 using string = std::string;
@@ -9,27 +9,21 @@ using string = std::string;
 #include "engine/shader.hpp"
 #include "engine/math.hpp"
 
-Shader::Shader(string v, string f) {
-	vPath = v;
-	fPath = f;
-}
+Shader::Shader(string _vPath, string _fPath)
+	: vPath(_vPath), fPath(_fPath) {}
 
 void Shader::compile() {
 	std::ifstream vFile;
 	std::ifstream fFile;
 	vFile.open(vPath);
 	if (!vFile.is_open()) {
-		std::cerr << "\e[31;1merror with shader file read:\e[m "
-			+ vPath + ":\n" + std::strerror(errno) << std::endl;
-		id = 0;
-		return;
+		throw std::runtime_error("\e[31;1merror with shader file read:\e[m "
+			+ vPath + ":\n" + std::strerror(errno));
 	}
 	fFile.open(fPath);
 	if (!fFile.is_open()) {
-		std::cerr << "\e[31;1merror with shader file read:\e[m "
-			+ fPath + ":\n" + std::strerror(errno) << std::endl;
-		id = 0;
-		return;
+		throw std::runtime_error("\e[31;1merror with shader file read:\e[m "
+			+ vPath + ":\n" + std::strerror(errno));
 	}
 
 	std::stringstream vCodeStream;
@@ -56,10 +50,8 @@ void Shader::compile() {
 	glGetShaderiv(v, GL_COMPILE_STATUS, &success);
 	if (!success) {
 		glGetShaderInfoLog(v, 4096, NULL, infoLog);
-		std::cerr << "\e[31;1merror with shader compilation:\e[m "
-			+ vPath + ":\n" + infoLog << std::endl;
-		id = 0;
-		return;
+		throw std::runtime_error("\e[31;1merror with shader compilation:\e[m "
+			+ vPath + ":\n" + infoLog);
 	}
 
 	f = glCreateShader(GL_FRAGMENT_SHADER);
@@ -68,10 +60,8 @@ void Shader::compile() {
 	glGetShaderiv(f, GL_COMPILE_STATUS, &success);
 	if (!success) {
 		glGetShaderInfoLog(f, 4096, NULL, infoLog);
-		std::cerr << "\e[31;1merror with shader compilation:\e[m "
-			+ fPath + ":\n" + infoLog << std::endl;
-		id = 0;
-		return;
+		throw std::runtime_error("\e[31;1merror with shader compilation:\e[m "
+			+ fPath + ":\n" + infoLog);
 	}
 
 	id = glCreateProgram();
@@ -81,10 +71,8 @@ void Shader::compile() {
 	glGetProgramiv(id, GL_LINK_STATUS, &success);
 	if (!success) {
 		glGetProgramInfoLog(id, 4096, NULL, infoLog);
-		std::cerr << "\e[31;1merror with program linking:\e[m "
-			+ vPath + ", " + fPath + ":\n" + infoLog << std::endl;
-		id = 0;
-		return;
+		throw std::runtime_error("\e[31;1merror with program linking:\e[m "
+			+ vPath + ", " + fPath + ":\n" + infoLog);
 	}
 
 	glDeleteShader(v);

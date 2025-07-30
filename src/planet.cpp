@@ -1,15 +1,16 @@
 #include <string>
 #include <vector>
-#include <iostream>
 
 #include "engine/math.hpp"
 #include "engine/shader.hpp"
 #include "engine/mesh.hpp"
 #include "planet.hpp"
 
-Planet::Planet(std::string n, vector p, vector v, float sr, float sg, Mesh & m)
-	: name(n), pos(p), vel(v), surfaceGravity(sg), surfaceRadius(sr), mesh(m) {
-	mass = sg * sr * sr / G;
+Planet::Planet(std::string _name, vector _pos, vector _vel,
+	float _surfaceGravity, float _surfaceRadius, Mesh &_mesh)
+	: name(_name), pos(_pos), vel(_vel), surfaceGravity(_surfaceGravity),
+	  surfaceRadius(_surfaceRadius), mesh(_mesh) {
+	mass = surfaceGravity * surfaceRadius * surfaceRadius / G;
 }
 
 std::string Planet::getName() {

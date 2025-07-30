@@ -1,4 +1,3 @@
-#include <iostream>
 #include <vector>
 
 #include "engine/meshUtils.hpp"
@@ -49,12 +48,12 @@ Mesh subdivideMesh(Mesh m, unsigned int n) {
 	idxs.reserve(18 * (n + 1) * (n + 2));
 	vs.reserve(6 * (n + 1) * (n + 2));
 	for (int f = 0; f < 12; f++) {
-		vector p0 = m.vs[m.idxs[3 * f]].p;
-		vector p1 = m.vs[m.idxs[3 * f + 1]].p;
-		vector p2 = m.vs[m.idxs[3 * f + 2]].p;
-		vector n0 = m.vs[m.idxs[3 * f]].n;
-		vector n1 = m.vs[m.idxs[3 * f + 1]].n;
-		vector n2 = m.vs[m.idxs[3 * f + 2]].n;
+		vector p0 = m.vs.at(m.idxs.at(3 * f)).p;
+		vector p1 = m.vs.at(m.idxs.at(3 * f + 1)).p;
+		vector p2 = m.vs.at(m.idxs.at(3 * f + 2)).p;
+		vector n0 = m.vs.at(m.idxs.at(3 * f)).n;
+		vector n1 = m.vs.at(m.idxs.at(3 * f + 1)).n;
+		vector n2 = m.vs.at(m.idxs.at(3 * f + 2)).n;
 		for (unsigned int i = 0; i < n + 1; i++) {
 			for (unsigned int j = 0; j < i + 1; j++) {
 				float li = (float)i / (float)n;
@@ -85,6 +84,7 @@ Mesh generateSphere(unsigned int n) {
 		vector vp = m.vs.at(i).p;
 		m.vs.at(i) = { vp.normalize(), vp.normalize() };
 	}
+	m.updateVAO();
 	return m;
 }
 
@@ -96,5 +96,5 @@ Mesh simpleQuad() {
 		{ { -1, 1, 0 }, { 0, 0, 1 } },
 	};
 	std::vector<unsigned int> idxs = { 0, 1, 2, 0, 2, 3 };
-	return { vs, idxs };
+	return Mesh(vs, idxs);
 }

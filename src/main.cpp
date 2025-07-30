@@ -64,9 +64,9 @@ int main() {
 
 	Mesh sphere = generateSphere(32);
 
-	Planet sun("The Sun", { 0, 0, 0 }, { 0, 0, 0 }, 32, 16, sphere);
-	Planet earth("Earth", { 256, 0, 0 }, { 0, 0, 8 }, 16, 4, sphere);
-	Planet anti("Anti-Earth", { -256, 0, 0 }, { 0, 0, -8 }, 16, 4, sphere);
+	Planet sun("The Sun", { 0, 0, 0 }, { 0, 0, 0 }, 16, 32, sphere);
+	Planet earth("Earth", { 256, 0, 0 }, { 0, 0, 8 }, 4, 16, sphere);
+	Planet anti("Anti-Earth", { -256, 0, 0 }, { 0, 0, -8 }, 4, 16, sphere);
 	std::vector<Celestial *> celestials{ &sun, &earth, &anti };
 
 	vector cPos = { 0, 0, 256 };

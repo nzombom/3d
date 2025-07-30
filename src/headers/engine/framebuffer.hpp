@@ -12,7 +12,7 @@ class FramebufferTexture {
 	unsigned int id;
 	GLenum formati, format, datatype, attachment;
 
-	void size(unsigned int, unsigned int);
+	void resize(unsigned int, unsigned int);
 
   public:
 	FramebufferTexture(GLenum, GLenum, GLenum, GLenum);
@@ -24,7 +24,7 @@ class Renderbuffer {
 	unsigned int id;
 	GLenum format, attachment;
 
-	void size(unsigned int, unsigned int);
+	void resize(unsigned int, unsigned int);
 
   public:
 	Renderbuffer(GLenum, GLenum);
@@ -47,7 +47,7 @@ class Framebuffer {
 	void bind();
 	void unbind();
 
-	void size(unsigned int, unsigned int);
+	void resize(unsigned int, unsigned int);
 	void clear(GLbitfield);
 
 	void drawTo();

@@ -22,6 +22,8 @@ class Mesh {
 	Mesh(std::vector<Vertex>, std::vector<unsigned int>);
 	~Mesh();
 
+	void updateVAO();
+
 	void draw();
 };
 

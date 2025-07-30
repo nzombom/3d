@@ -4,8 +4,10 @@
 
 #include "engine/framebuffer.hpp"
 
-FramebufferTexture::FramebufferTexture(GLenum fi, GLenum f, GLenum t, GLenum a)
-	: formati(fi), format(f), datatype(t), attachment(a) {
+FramebufferTexture::FramebufferTexture(GLenum _formati, GLenum _format,
+	GLenum _datatype, GLenum _attachment)
+	: formati(_formati), format(_format), datatype(_datatype),
+	  attachment(_attachment) {
 	glGenTextures(1, &id);
 	glBindTexture(GL_TEXTURE_2D, id);
 	glTexImage2D(GL_TEXTURE_2D, 0, formati, 1, 1, 0, format, datatype, NULL);
@@ -15,7 +17,7 @@ FramebufferTexture::FramebufferTexture(GLenum fi, GLenum f, GLenum t, GLenum a)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
-void FramebufferTexture::size(unsigned int w, unsigned int h) {
+void FramebufferTexture::resize(unsigned int w, unsigned int h) {
 	glBindTexture(GL_TEXTURE_2D, id);
 	glTexImage2D(GL_TEXTURE_2D, 0, formati, w, h, 0, format, datatype, NULL);
 }
@@ -28,7 +30,7 @@ Renderbuffer::Renderbuffer(GLenum f, GLenum a)
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 }
 
-void Renderbuffer::size(unsigned int w, unsigned int h) {
+void Renderbuffer::resize(unsigned int w, unsigned int h) {
 	glBindRenderbuffer(GL_RENDERBUFFER, id);
 	glRenderbufferStorage(GL_RENDERBUFFER, format, w, h);
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
@@ -49,8 +51,8 @@ std::runtime_error Framebuffer::checkError(unsigned int status) {
 	}
 }
 
-Framebuffer::Framebuffer(std::vector<FramebufferTexture> t)
-	: textures(t) {
+Framebuffer::Framebuffer(std::vector<FramebufferTexture> _textures)
+	: textures(_textures) {
 	glGenFramebuffers(1, &id);
 	bind();
 
@@ -66,8 +68,9 @@ Framebuffer::Framebuffer(std::vector<FramebufferTexture> t)
 	if (status != GL_FRAMEBUFFER_COMPLETE) throw checkError(status);
 	unbind();
 }
-Framebuffer::Framebuffer(std::vector<FramebufferTexture> t, Renderbuffer r)
-	: textures(t), rbo(r) {
+Framebuffer::Framebuffer(std::vector<FramebufferTexture> _textures,
+	Renderbuffer _rbo)
+	: textures(_textures), rbo(_rbo) {
 	glGenFramebuffers(1, &id);
 	bind();
 
@@ -97,14 +100,14 @@ void Framebuffer::unbind() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Framebuffer::size(unsigned int _w, unsigned int _h) {
+void Framebuffer::resize(unsigned int _w, unsigned int _h) {
 	w = _w;
 	h = _h;
 
 	for (unsigned int i = 0; i < textures.size(); i++) {
-		textures.at(i).size(w, h);
+		textures.at(i).resize(w, h);
 	}
-	if (rbo.has_value()) rbo->size(w, h);
+	if (rbo.has_value()) rbo->resize(w, h);
 }
 void Framebuffer::clear(GLbitfield bits) {
 	glClear(bits);
