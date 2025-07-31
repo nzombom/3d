@@ -13,22 +13,34 @@
 #include "planet.hpp"
 
 bool quit = false;
-std::vector<InputControl> controls = {
-	{ INPUT_KEYBOARD, { .k = SDLK_W } },
-	{ INPUT_KEYBOARD, { .k = SDLK_S } },
-	{ INPUT_KEYBOARD, { .k = SDLK_A } },
-	{ INPUT_KEYBOARD, { .k = SDLK_D } },
-	{ INPUT_KEYBOARD, { .k = SDLK_Q } },
-	{ INPUT_KEYBOARD, { .k = SDLK_E } },
-	{ INPUT_KEYBOARD, { .k = SDLK_I } },
-	{ INPUT_KEYBOARD, { .k = SDLK_K } },
-	{ INPUT_KEYBOARD, { .k = SDLK_J } },
-	{ INPUT_KEYBOARD, { .k = SDLK_L } },
-	{ INPUT_KEYBOARD, { .k = SDLK_U } },
-	{ INPUT_KEYBOARD, { .k = SDLK_O } },
-	{ INPUT_KEYBOARD, { .k = SDLK_SPACE } },
+InputAxis viewIK = {
+	{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_I } },
+	{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_K } },
 };
-InputState input = InputState(controls);
+InputAxis viewJL = {
+	{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_J } },
+	{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_L } },
+};
+InputAxis viewUO = {
+	{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_U } },
+	{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_O } },
+};
+InputAxis moveWS = {
+	{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_W } },
+	{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_S } },
+};
+InputAxis moveAD = {
+	{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_A } },
+	{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_D } },
+};
+InputAxis moveQE = {
+	{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_Q } },
+	{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_E } },
+};
+InputControl inputSpace = { INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_SPACE } };
+InputState input({ inputSpace }, {
+	viewIK, viewJL, viewUO, moveWS, moveAD, moveQE,
+});
 
 void event() {
 	SDL_Event e;
@@ -56,17 +68,17 @@ int main() {
 
 	Shader shaderSolid("shaders/solid/v.glsl",
 		"shaders/solid/f.glsl");
-	Shader shaderSun("shaders/light/v.glsl",
-		"shaders/light/f.glsl");
+	Shader shaderSun("shaders/sun/v.glsl",
+		"shaders/sun/f.glsl");
 
 	shaderSolid.compile();
 	shaderSun.compile();
 
 	Mesh sphere = generateSphere(32);
 
-	Planet sun("The Sun", { 0, 0, 0 }, { 0, 0, 0 }, 16, 32, sphere);
-	Planet earth("Earth", { 256, 0, 0 }, { 0, 0, 8 }, 4, 16, sphere);
-	Planet anti("Anti-Earth", { -256, 0, 0 }, { 0, 0, -8 }, 4, 16, sphere);
+	Planet sun("The Sun", { 0, 0, 0 }, { 0, 0, 0 }, 64, 32, sphere);
+	Planet earth("Earth", { 256, 0, 0 }, { 0, 0, 16 }, 8, 8, sphere);
+	Planet anti("Anti-Earth", { -256, 0, 0 }, { 0, 0, -16 }, 8, 8, sphere);
 	std::vector<Celestial *> celestials{ &sun, &earth, &anti };
 
 	vector cPos = { 0, 0, 256 };
@@ -74,7 +86,7 @@ int main() {
 	vector cAccel = { 0, 0, 0 };
 	quat cDir = IDR;
 
-	const float baseAccel = 4.0;
+	const float baseAccel = 8;
 
 	unsigned long long prev = 0;
 	while (!quit) {
@@ -84,19 +96,16 @@ int main() {
 		prev = t;
 
 		float angle = M_PI / 256.0;
-		cDir *= quat::fromAA(vector{ -1, 0, 0 },
-				input.getAxis(6, 7) * angle);
-		cDir *= quat::fromAA(vector{ 0, -1, 0 },
-				input.getAxis(8, 9) * angle);
-		cDir *= quat::fromAA(vector{ 0, 0, -1 },
-				input.getAxis(10, 11) * angle);
+		cDir *= quat::fromAA(vector{ -1, 0, 0 }, input.getAxis(0) * angle);
+		cDir *= quat::fromAA(vector{ 0, -1, 0 }, input.getAxis(1) * angle);
+		cDir *= quat::fromAA(vector{ 0, 0, -1 }, input.getAxis(2) * angle);
 		cDir.renormalize();
 		cAccel = { 0, 0, 0 };
-		if (input.s(12)) cAccel = -cVel;
+		if (input.getControl(0)) cAccel = -cVel;
 		else {
-			cAccel += cDir.rotate(vector{ 0, 0, 1 }) * input.getAxis(0, 1);
-			cAccel += cDir.rotate(vector{ 1, 0, 0 }) * input.getAxis(2, 3);
-			cAccel += cDir.rotate(vector{ 0, 1, 0 }) * input.getAxis(4, 5);
+			cAccel += cDir.rotate(vector{ 0, 0, 1 }) * input.getAxis(3);
+			cAccel += cDir.rotate(vector{ 1, 0, 0 }) * input.getAxis(4);
+			cAccel += cDir.rotate(vector{ 0, 1, 0 }) * input.getAxis(5);
 		}
 		cVel += cAccel.normalize() * baseAccel * dt / 1000.0;
 		for (unsigned int i = 0; i < celestials.size(); i++) {

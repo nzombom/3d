@@ -1,26 +1,34 @@
 #include <vector>
-#include <map>
+#include <bitset>
 #include <SDL3/SDL.h>
 
-const unsigned char INPUT_KEYBOARD = 0;
-const unsigned char INPUT_MOUSE = 1;
+enum class INPUT_TYPE { keyboard, mouse, gamepad };
 struct InputControl {
-	unsigned char type;
+	INPUT_TYPE type;
 	union {
-		SDL_Keycode k;
+		SDL_Scancode k;
 		unsigned char m;
-	} v;
+	} c;
+};
+struct InputAxis {
+	InputControl l, r;
 };
 
 class InputState {
-	std::map<SDL_Keycode, unsigned int> kbControlMap;
-	std::map<unsigned char, unsigned int> mControlMap;
-	std::vector<bool> state;
+	std::bitset<SDL_SCANCODE_COUNT> kbState;
+	std::bitset<16> mbState;
+	std::vector<InputControl> controlMapping;
+	std::vector<InputAxis> axisMapping;
 
   public:
-	InputState(std::vector<InputControl>);
+	InputState() = default;
+	InputState(std::vector<InputControl>, std::vector<InputAxis>);
 
 	void update(SDL_Event);
-	bool s(unsigned int);
-	float getAxis(unsigned int, unsigned int);
+
+	bool getControl(InputControl);
+	float getAxis(InputAxis);
+
+	bool getControl(unsigned int);
+	float getAxis(unsigned int);
 };
