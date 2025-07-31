@@ -23,8 +23,8 @@ class Planet : public Celestial {
 	virtual float getMass();
 	virtual vector getPos();
 
-	virtual void updateVel(std::vector<Celestial *>, unsigned int);
-	virtual void updatePos(std::vector<Celestial *>, unsigned int);
+	virtual void updateVel(std::vector<Celestial *>, double);
+	virtual void updatePos(std::vector<Celestial *>, double);
 
 	virtual void draw(Shader &s);
 };

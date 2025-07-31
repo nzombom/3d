@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cmath>
+#include <string>
 #include <SDL3/SDL.h>
 #include <GL/glew.h>
 
@@ -12,34 +13,34 @@
 #include "celestial.hpp"
 #include "planet.hpp"
 
-bool quit = false;
-InputAxis viewIK = {
-	{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_I } },
-	{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_K } },
-};
-InputAxis viewJL = {
-	{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_J } },
-	{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_L } },
-};
-InputAxis viewUO = {
-	{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_U } },
-	{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_O } },
-};
-InputAxis moveWS = {
-	{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_W } },
-	{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_S } },
-};
-InputAxis moveAD = {
-	{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_A } },
-	{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_D } },
-};
-InputAxis moveQE = {
-	{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_Q } },
-	{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_E } },
-};
-InputControl inputSpace = { INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_SPACE } };
-InputState input({ inputSpace }, {
-	viewIK, viewJL, viewUO, moveWS, moveAD, moveQE,
+static bool quit = false;
+static InputState input({
+	{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_SPACE } },
+}, {
+	{
+		{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_I } },
+		{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_K } },
+	},
+	{
+		{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_J } },
+		{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_L } },
+	},
+	{
+		{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_U } },
+		{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_O } },
+	},
+	{
+		{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_W } },
+		{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_S } },
+	},
+	{
+		{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_A } },
+		{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_D } },
+	},
+	{
+		{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_Q } },
+		{ INPUT_TYPE::keyboard, { .k = SDL_SCANCODE_E } },
+	},
 });
 
 void event() {
@@ -84,18 +85,20 @@ int main() {
 	vector cPos = { 0, 0, 256 };
 	vector cVel = { 0, 0, 0 };
 	vector cAccel = { 0, 0, 0 };
-	quat cDir = IDR;
+	quat cDir = identity::rotation;
 
 	const float baseAccel = 8;
 
 	unsigned long long prev = 0;
+	unsigned long frameNumber = 0;
 	while (!quit) {
 		event();
-		unsigned long long t = SDL_GetTicks();
-		unsigned int dt = t - prev;
+		unsigned long long t = SDL_GetTicksNS();
+		double dt = (t - prev) / 1.0e9;
 		prev = t;
+		frameNumber++;
 
-		float angle = M_PI / 256.0;
+		float angle = M_PI / 4.0 * dt;
 		cDir *= quat::fromAA(vector{ -1, 0, 0 }, input.getAxis(0) * angle);
 		cDir *= quat::fromAA(vector{ 0, -1, 0 }, input.getAxis(1) * angle);
 		cDir *= quat::fromAA(vector{ 0, 0, -1 }, input.getAxis(2) * angle);
@@ -107,14 +110,14 @@ int main() {
 			cAccel += cDir.rotate(vector{ 1, 0, 0 }) * input.getAxis(4);
 			cAccel += cDir.rotate(vector{ 0, 1, 0 }) * input.getAxis(5);
 		}
-		cVel += cAccel.normalize() * baseAccel * dt / 1000.0;
+		cVel += cAccel.normalize() * baseAccel * dt;
 		for (unsigned int i = 0; i < celestials.size(); i++) {
 			Celestial * cel = celestials.at(i);
 			vector dir = cel->getPos() - cPos;
 			float gravAccel = G * cel->getMass() / dir.slen();
-			cVel += dir.normalize() * gravAccel * dt / 1000.0;
+			cVel += dir.normalize() * gravAccel * dt;
 		}
-		cPos += cVel * dt / 1000.0;
+		cPos += cVel * dt;
 		Camera cam = { cPos, cDir, 1.0 / 16.0, 8192, M_PI / 2.0, 16.0 / 9.0 };
 
 		for (unsigned int i = 0; i < celestials.size(); i++) {
@@ -125,6 +128,7 @@ int main() {
 		}
 
 		glEnable(GL_DEPTH_TEST);
+		glClearColor(0.0, 0.0, 0.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		Light sun = { celestials.at(0)->getPos(), { 32768, 32768, 32768 } };
@@ -146,6 +150,9 @@ int main() {
 		celestials.at(0)->draw(shaderSun);
 
 		SDL_GL_SwapWindow(window);
+
+		if (frameNumber % 120 == 0) std::cout << "last frame " << 1.0 / dt
+				<< " fps" << std::endl;
 	}
 
 	SDL_Quit();

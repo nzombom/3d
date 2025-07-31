@@ -45,7 +45,7 @@ class Framebuffer {
 	unsigned int getId();
 	unsigned int w, h;
 	void bind();
-	void unbind();
+	static void unbind();
 
 	void resize(unsigned int, unsigned int);
 	void clear(GLbitfield);
